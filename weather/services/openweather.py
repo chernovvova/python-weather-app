@@ -28,9 +28,16 @@ class OpenWeatherService:
     def get_locations_by_name(self, name):
         response = requests.get(f'http://api.openweathermap.org/geo/1.0/direct?q={name}'
                             f'&limit={LOCATION_LIMIT}&appid={self.API_KEY}')
-
         content = response.json()
+        if response.status_code // 100 == 2:
+            return content
 
+        raise self.API_ERROR_CODES_EXCEPTIONS.get(response.status_code, OpenWeatherUnknownError(content.get('message')))
+
+    def get_weather_by_coordinates(self, lat, lon):
+        response = requests.get(f'https://api.openweathermap.org/data/2.5/weather?lat={lat}'
+                                f'&lon={lon}&appid={self.API_KEY}')
+        content = response.json()
         if response.status_code // 100 == 2:
             return content
 
